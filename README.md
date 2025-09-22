@@ -127,14 +127,14 @@ Presenter - презентер содержит основную логику п
 Конструктор не принимает параметров. Инициализирует модель с пустыми данными.
 Поля класса:
 ```
-`private products: IProduct[]` - хранит массив всех товаров каталога
-`private selectedProduct: IProduct | null` - хранит товар, выбранный для подробного отображения
+private products: IProduct[] - хранит массив всех товаров каталога
+private selectedProduct: IProduct | null - хранит товар, выбранный для подробного отображения
 Методы класса:
-`setProducts(products: IProduct[]): void` - сохраняет массив товаров, полученный в параметрах метода
-`getProducts(): IProduct[]` - возвращает массив всех товаров из модели
-`getProductById(id: string): IProduct | undefined` - возвращает один товар по его id
-`setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения
-`getSelectedProduct(): IProduct | null` - возвращает товар для подробного отображения
+setProducts(products: IProduct[]): void - сохраняет массив товаров, полученный в параметрах метода
+getProducts(): IProduct[] - возвращает массив всех товаров из модели
+getProductById(id: string): IProduct | undefined - возвращает один товар по его id
+setSelectedProduct(product: IProduct): void - сохраняет товар для подробного отображения
+getSelectedProduct(): IProduct | null - возвращает товар для подробного отображения
 ```
 
 ### Класс CartModel
@@ -142,13 +142,13 @@ Presenter - презентер содержит основную логику п
 Конструктор не принимает параметров. Инициализирует модель с пустой корзиной.
 Поля класса:
 ```
-`private items: IProduct[]` - массив товаров, добавленных в корзину
+private items: IProduct[] - массив товаров, добавленных в корзину
 Методы класса:
-`getItems(): IProduct[]` - возвращает массив товаров в корзине
-`addItem(product: IProduct): void` - добавляет переданный товар в корзину
-`removeItem(id: string): void` - удаляет товар с указанным id из корзины
-`clear(): void` - полностью очищает корзину
-`getTotalPrice(): number` - вычисляет и возвращает общую стоимость всех товаров в корзине
-`getItemCount(): number` - возвращает общее количество товаров в корзине
-`hasItem(id: string): boolean` - проверяет, присутствует ли товар с указанным id в корзине
+getItems(): IProduct[] - возвращает массив товаров в корзине
+addItem(product: IProduct): void - добавляет переданный товар в корзину
+removeItem(id: string): void - удаляет товар с указанным id из корзины
+clear(): void - полностью очищает корзину
+getTotalPrice(): number - вычисляет и возвращает общую стоимость всех товаров в корзине
+getItemCount(): number - возвращает общее количество товаров в корзине
+hasItem(id: string): boolean - проверяет, присутствует ли товар с указанным id в корзине
 ```
