@@ -100,7 +100,7 @@ Presenter - презентер содержит основную логику п
 
 ## Данные
 ### Интерфейсы данных 
-  interface IProduct {
+  `interface IProduct {
     id: string;           // Уникальный идентификатор товара
     description: string;  // Подробное описание товара
     image: string;        // Ссылка на изображение товара
@@ -115,4 +115,4 @@ Presenter - презентер содержит основную логику п
     email: string;     // Адрес электронной почты
     phone: string;     // Номер телефона
     address: string;   // Адрес доставки
-  }
+  }`
