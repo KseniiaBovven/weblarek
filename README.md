@@ -126,21 +126,14 @@ Presenter - презентер содержит основную логику п
 Назначение: Модель представляет собой список всех товаров на главной странице. Отвечает за хранение каталога товаров и управление состоянием выбранного товара для подробного просмотра.
 Конструктор не принимает параметров. Инициализирует модель с пустыми данными.
 Поля класса:
-```typescript
-private products: IProduct[]` - хранит массив всех товаров каталога
-```typescript
-private selectedProduct: IProduct | null` - хранит товар, выбранный для подробного отображения
+`private products: IProduct[]` - хранит массив всех товаров каталога
+`private selectedProduct: IProduct | null` - хранит товар, выбранный для подробного отображения
 Методы класса:
-```typescript
-setProducts(products: IProduct[]): void` - сохраняет массив товаров, полученный в параметрах метода
-```typescript
-getProducts(): IProduct[]` - возвращает массив всех товаров из модели
-```typescript
-getProductById(id: string): IProduct | undefined` - возвращает один товар по его id
-```typescript
-setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения
-```typescript
-getSelectedProduct(): IProduct | null` - возвращает товар для подробного отображения
+`setProducts(products: IProduct[]): void` - сохраняет массив товаров, полученный в параметрах метода
+`getProducts(): IProduct[]` - возвращает массив всех товаров из модели
+`getProductById(id: string): IProduct | undefined` - возвращает один товар по его id
+`setSelectedProduct(product: IProduct): void` - сохраняет товар для подробного отображения
+`getSelectedProduct(): IProduct | null` - возвращает товар для подробного отображения
 
 ### Класс CartModel
 Назначение: Модель управляет корзиной покупок: добавлением, удалением товаров, подсчетом общей стоимости и количества.
