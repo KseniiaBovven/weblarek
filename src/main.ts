@@ -35,7 +35,6 @@ function testModels() {
     console.log('ТЕСТИРОВАНИЕ МОДЕЛЕЙ ЗАВЕРШЕНО');
 }
 
-// Функция для работы с реальным сервером
 async function testServerIntegration() {
     console.log('ТЕСТИРОВАНИЕ РАБОТЫ С СЕРВЕРОМ');
 
