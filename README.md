@@ -66,6 +66,16 @@ Presenter - презентер содержит основную логику п
 
 #### Класс Component
 Является базовым классом для всех компонентов интерфейса.
+Назначение: Предоставляет базовый функционал для работы с DOM-элементами.
+
+Конструктор:
+`constructor(protected readonly container: HTMLElement)`
+Методы:
+`setText(element: HTMLElement, value: unknown): void` - устанавливает текстовое содержимое элемента
+`setDisabled(element: HTMLElement, state: boolean): void` - блокирует/разблокирует элемент
+`setImage(element: HTMLImageElement, src: string, alt?: string): void` - устанавливает изображение
+`render(data?: Partial<T>): HTMLElement` - обновляет компонент данными
+
 ```typescript
 export abstract class Component<T> {
     protected constructor(protected readonly container: HTMLElement) {}
@@ -133,6 +143,13 @@ export class Api implements IApi {
 ```
 #### Класс EventEmitter
 Брокер событий реализует паттерн "Наблюдатель", позволяющий отправлять события и подписываться на события, происходящие в системе. Класс используется для связи слоя данных и представления.
+Назначение: Обеспечивает коммуникацию между компонентами через события.
+Методы:
+
+`on<T extends object>(eventName: EventName, callback: (data: T) => void): void` - подписка на событие
+`emit<T extends object>(eventName: string, data?: T): void` - генерация события
+`off(eventName: EventName, callback: Subscriber): void` - отписка от события
+
 ```typescript
 export class EventEmitter implements IEvents {
     _events: Map<EventName, Set<Subscriber>>;
@@ -184,6 +201,17 @@ export class EventEmitter implements IEvents {
 
 ### Класс CatalogModel
 Назначение: Модель представляет собой список всех товаров на главной странице. Отвечает за хранение каталога товаров и управление состоянием выбранного товара для подробного просмотра.
+
+Конструктор:
+`constructor(events: any)`
+Поля:
+`private _products: IProduct[]` - массив товаров
+`private _selectedProduct: IProduct | null` - выбранный товар
+Методы:
+`setProducts(products: IProduct[]): void` - устанавливает массив товаров
+`getProducts(): IProduct[]` - возвращает все товары
+`getProductById(id: string): IProduct | undefined` - находит товар по ID
+
 ```typescript
 export class CatalogModel extends Model<ICatalogData> {
     private _products: IProduct[] = [];
@@ -208,6 +236,18 @@ export class CatalogModel extends Model<ICatalogData> {
 ### Класс CartModel
 Назначение: Модель управляет корзиной покупок: добавлением, удалением товаров, подсчетом общей стоимости и количества.
 Конструктор не принимает параметров. Инициализирует модель с пустой корзиной.
+Назначение: Управляет корзиной покупок.
+Конструктор:
+`constructor(events: any)`
+Поля:
+`private _items: IProduct[]` - товары в корзине
+
+Методы:
+`addItem(product: IProduct): void` - добавляет товар в корзину
+`removeItem(id: string): void` - удаляет товар из корзины
+`getTotalPrice(): number` - вычисляет общую стоимость
+`getItemCount(): number` - возвращает количество товаров
+
 ```typescript
 export class CartModel extends Model<ICartData> {
     private _items: IProduct[] = [];
@@ -229,6 +269,20 @@ export class CartModel extends Model<ICartData> {
 ```
 ### Класс BuyerModel
 Назначение: Модель хранит и валидирует контактные данные и данные о доставке, введенные пользователем при оформлении заказа.
+Назначение: Управляет данными покупателя.
+Конструктор:
+`constructor(events: any)`
+Поля:
+`private _payment: TPayment` - способ оплаты
+`private _address: string` - адрес доставки
+`private _email: string` - email
+`private _phone: string` - телефон
+Методы:
+`setBuyerData(data: Partial<IBuyer>): void `- устанавливает данные покупателя
+`validateOrder(): FormErrors` - валидирует данные заказа
+`validateContacts(): FormErrors` - валидирует контактные данные
+
+
 ```typescript
 export class BuyerModel extends Model<IBuyer> {
     private _payment: TPayment = null;
@@ -276,6 +330,12 @@ export class BuyerModel extends Model<IBuyer> {
 
 ### Page
 Главная страница приложения.
+Конструктор:
+`constructor(container: HTMLElement, protected events: IEvents)`
+Свойства:
+`counter: number` - количество товаров в корзине
+`gallery: HTMLElement[]` - массив карточек товаров
+`locked: boolean` - состояние блокировки страницы
 
 ```typescript
 export class Page extends Component<IPage> {
@@ -301,6 +361,13 @@ export class Page extends Component<IPage> {
 ```
 ### ProductCard
 Карточка товара.
+Конструктор:
+`constructor(container: HTMLElement, protected events: IEvents)`
+Свойства:
+`id: string` - идентификатор товара
+`title: string `- название товара
+`price: number | null` - цена товара
+`inBasket: boolean` - флаг наличия в корзине
 
 ```typescript
 export class ProductCard extends CardView {
@@ -326,6 +393,11 @@ export class ProductCard extends CardView {
 ```
 ### Basket
 Корзина покупок.
+Конструктор:
+`constructor(container: HTMLElement, protected events: IEvents)`
+Свойства:
+`items: IProduct[]` - товары в корзине
+`total: number` - общая стоимость
 
 ```typescript
 export class Basket extends Component<IBasketData> {
@@ -341,7 +413,6 @@ export class Basket extends Component<IBasketData> {
     }
 
     set items(items: IProduct[]) {
-        // Безопасное создание элементов через DOM API
         while (this._list.firstChild) {
             this._list.removeChild(this._list.firstChild);
         }
@@ -353,8 +424,43 @@ export class Basket extends Component<IBasketData> {
     }
 }
 ```
+
+### OrderForm
+Назначение: Форма оформления заказа.
+Конструктор:
+`constructor(container: HTMLElement, protected events: IEvents)`
+Свойства:
+`payment: string` - выбранный способ оплаты
+`address: string` - адрес доставки
+`valid: boolean` - валидность формы
+`errors: string` - сообщения об ошибках
+
+### ContactForm
+Назначение: Форма контактных данных.
+
+Конструктор:
+`constructor(container: HTMLElement, protected events: IEvents)`
+Свойства:
+`email: string` - email покупателя
+`phone: string` - телефон покупателя
+`valid: boolean` - валидность формы
+`errors: string` - сообщения об ошибках
+
 ### AppPresenter
 Связывает все компоненты приложения.
+Конструктор:
+`constructor(
+    private api: ShopAPI,
+    private catalogModel: CatalogModel,
+    private cartModel: CartModel,
+    private buyerModel: BuyerModel,
+    private events: IEvents
+)`
+Основные методы:
+`setupEventListeners(): void` - настраивает обработчики событий
+`initializeApp(): Promise<void>` - инициализирует приложение
+`renderCatalog(): void` - отображает каталог товаров
+`openProductModal(productId: string): void` - открывает модальное окно товара
 
 ```typescript
 export class AppPresenter {
