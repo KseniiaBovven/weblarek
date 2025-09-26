@@ -1,43 +1,70 @@
-import { IBuyer, TPayment } from '../../types'; 
+import { IBuyer, TPayment, FormErrors } from '../../types';
+import { Model } from '../base/Model';
 
-export class BuyerModel { 
-    private payment: TPayment | null = null; 
-    private address: string = ''; 
-    private phone: string = ''; 
-    private email: string = ''; 
+export class BuyerModel extends Model<IBuyer> {
+    private _payment: TPayment = null;
+    private _address: string = '';
+    private _phone: string = '';
+    private _email: string = '';
 
-    setBuyerData(data: Partial<IBuyer>): void { 
-        if (data.payment !== undefined) this.payment = data.payment; 
-        if (data.address !== undefined) this.address = data.address; 
-        if (data.phone !== undefined) this.phone = data.phone; 
-        if (data.email !== undefined) this.email = data.email; 
-    } 
+    constructor(events: any) {
+        super({ 
+            payment: null, 
+            address: '', 
+            phone: '', 
+            email: '' 
+        }, events);
+    }
 
-    getBuyerData(): IBuyer { 
-        return { 
-            payment: this.payment as TPayment, 
-            address: this.address, 
-            phone: this.phone, 
-            email: this.email, 
-        }; 
-    } 
+    setBuyerData(data: Partial<IBuyer>): void {
+        if (data.payment !== undefined) this._payment = data.payment;
+        if (data.address !== undefined) this._address = data.address;
+        if (data.phone !== undefined) this._phone = data.phone;
+        if (data.email !== undefined) this._email = data.email;
 
-    clear(): void { 
-        this.payment = null; 
-        this.address = ''; 
-        this.phone = ''; 
-        this.email = ''; 
-    } 
+        this.emitChanges('buyer:updated', this.getBuyerData());
+    }
 
-    // Валидация данных
-    validate(): { [field in keyof IBuyer]?: string } {
-        const errors: { [field in keyof IBuyer]?: string } = {};
+    getBuyerData(): IBuyer {
+        return {
+            payment: this._payment,
+            address: this._address,
+            phone: this._phone,
+            email: this._email,
+        };
+    }
+
+    clear(): void {
+        this._payment = null;
+        this._address = '';
+        this._phone = '';
+        this._email = '';
+        this.emitChanges('buyer:updated', this.getBuyerData());
+    }
+
+    validateOrder(): FormErrors {
+        const errors: FormErrors = {};
         
-        if (!this.payment) errors.payment = 'Не выбран вид оплаты';
-        if (!this.address.trim()) errors.address = 'Укажите адрес доставки';
-        if (!this.phone.trim()) errors.phone = 'Укажите номер телефона';
-        if (!this.email.trim()) errors.email = 'Укажите адрес электронной почты';
+        if (!this._payment) errors.payment = 'Не выбран вид оплаты';
+        if (!this._address.trim()) errors.address = 'Укажите адрес доставки';
         
         return errors;
+    }
+
+    validateContacts(): FormErrors {
+        const errors: FormErrors = {};
+        
+        if (!this._phone.trim()) errors.phone = 'Укажите номер телефона';
+        if (!this._email.trim()) errors.email = 'Укажите адрес электронной почты';
+        
+        return errors;
+    }
+
+    isOrderValid(): boolean {
+        return Object.keys(this.validateOrder()).length === 0;
+    }
+
+    isContactsValid(): boolean {
+        return Object.keys(this.validateContacts()).length === 0;
     }
 }

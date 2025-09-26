@@ -1,40 +1,60 @@
 import { IProduct } from '../../types';
+import { Model } from '../base/Model';
 
-export class CartModel {
-    private items: IProduct[] = [];
-    
-    // Возвращает товары в корзине
-    getItems(): IProduct[] {
-        return this.items;
+// Создаем интерфейс для данных корзины
+interface ICartData {
+    items: IProduct[];
+    total: number;
+    count: number;
+}
+
+export class CartModel extends Model<ICartData> {
+    private _items: IProduct[] = [];
+
+    constructor(events: any) {
+        super({ items: [], total: 0, count: 0 }, events);
     }
 
-    // Добавляет товар в корзину
     addItem(product: IProduct): void {
-        this.items.push(product);
+        this._items.push(product);
+        this.emitChanges('cart:updated', this.getCartData());
     }
 
-    // Удаляет товар из корзины
     removeItem(id: string): void {
-        this.items = this.items.filter(item => item.id !== id);
+        this._items = this._items.filter(item => item.id !== id);
+        this.emitChanges('cart:updated', this.getCartData());
     }
 
-    // Очищает корзину
     clear(): void {
-        this.items = [];
+        this._items = [];
+        this.emitChanges('cart:updated', this.getCartData());
     }
 
-    // Считает общую стоимость
+    private getCartData(): ICartData {
+        return {
+            items: this._items,
+            total: this.getTotalPrice(),
+            count: this.getItemCount()
+        };
+    }
+
+    getItems(): IProduct[] {
+        return this._items;
+    }
+
     getTotalPrice(): number {
-        return this.items.reduce((total, product) => total + (product.price || 0), 0);
+        return this._items.reduce((total, product) => total + (product.price || 0), 0);
     }
     
-    // Возвращает количество товаров
     getItemCount(): number {
-        return this.items.length;
+        return this._items.length;
     }
 
-    // Проверяет наличие товара
     hasItem(id: string): boolean {
-        return this.items.some(item => item.id === id);
+        return this._items.some(item => item.id === id);
+    }
+
+    getItemIds(): string[] {
+        return this._items.map(item => item.id);
     }
 }

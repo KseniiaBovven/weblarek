@@ -1,31 +1,52 @@
 import { IProduct } from '../../types';
+import { Model } from '../base/Model';
 
-export class CatalogModel {
-    private products: IProduct[] = [];
-    private selectedProduct: IProduct | null = null;
+interface ICatalogData {
+    products: IProduct[];
+    selectedProduct: IProduct | null;
+}
 
-    // Сохраняет массив товаров
+export class CatalogModel extends Model<ICatalogData> {
+    private _products: IProduct[] = [];
+    private _selectedProduct: IProduct | null = null;
+
+    constructor(events: any) {
+        super({ products: [], selectedProduct: null }, events);
+    }
+
     setProducts(products: IProduct[]): void {
-        this.products = products;
+        this._products = products;
+        this.emitChanges('catalog:updated', { 
+            products: this._products,
+            selectedProduct: this._selectedProduct
+        });
     }
 
-    // Возвращает массив всех товаров
     getProducts(): IProduct[] {
-        return this.products;
+        return this._products;
     }
 
-    // Находит товар по ID
     getProductById(id: string): IProduct | undefined {
-        return this.products.find(product => product.id === id);
+        return this._products.find(product => product.id === id);
     }
 
-    // Сохраняет выбранный товар
     setSelectedProduct(product: IProduct): void {
-        this.selectedProduct = product;
+        this._selectedProduct = product;
+        this.emitChanges('product:selected', { 
+            products: this._products,
+            selectedProduct: this._selectedProduct
+        });
     }
 
-    // Возвращает выбранный товар
     getSelectedProduct(): IProduct | null {
-        return this.selectedProduct;
+        return this._selectedProduct;
+    }
+
+    clearSelectedProduct(): void {
+        this._selectedProduct = null;
+        this.emitChanges('product:selected', { 
+            products: this._products,
+            selectedProduct: null
+        });
     }
 }

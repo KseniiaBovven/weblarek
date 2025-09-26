@@ -1,12 +1,22 @@
-/**
- * Базовый компонент
- */
 export abstract class Component<T> {
-    protected constructor(protected readonly container: HTMLElement) {
-        // Учитывайте что код в конструкторе исполняется ДО всех объявлений в дочернем классе
-    }
+    protected constructor(protected readonly container: HTMLElement) {}
 
     // Инструментарий для работы с DOM в дочерних компонентах
+
+    // Установить текстовое содержимое
+    protected setText(element: HTMLElement, value: unknown) {
+        if (element) {
+            element.textContent = String(value);
+        }
+    }
+
+    // Сменить статус блокировки
+    setDisabled(element: HTMLElement, state: boolean) {
+        if (element) {
+            if (state) element.setAttribute('disabled', 'disabled');
+            else element.removeAttribute('disabled');
+        }
+    }
 
     // Установить изображение с альтернативным текстом
     protected setImage(element: HTMLImageElement, src: string, alt?: string) {

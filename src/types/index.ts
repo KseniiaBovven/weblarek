@@ -5,6 +5,10 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
+export interface IApiError {
+    error: string;
+}
+
 // Тип для способа оплаты
 export type TPayment = 'card' | 'cash' | null;
 
@@ -33,6 +37,7 @@ export interface IOrderRequest {
   phone: string;
   address: string;
   items: string[];
+  total: number;
 }
 
 // Результат создания заказа
@@ -45,3 +50,6 @@ export interface IOrderResult {
 export interface IProductListResponse {
   items: IProduct[];
 }
+
+// Тип для ошибок формы
+export type FormErrors = Partial<Record<keyof IBuyer, string>>;

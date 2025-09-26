@@ -2,6 +2,7 @@ import { IApi, IProduct, IOrderRequest, IOrderResult, IProductListResponse } fro
 
 export class ShopAPI {
     constructor(private api: IApi) {}
+
     async getProductList(): Promise<IProduct[]> {
         try {
             const response = await this.api.get<IProductListResponse>('/product');
@@ -18,7 +19,7 @@ export class ShopAPI {
             return response;
         } catch (error) {
             console.error('Ошибка при создании заказа:', error);
-            throw error; // Пробрасываем ошибку дальше, т.к. Api уже обработал её
+            throw error;
         }
     }
 }
