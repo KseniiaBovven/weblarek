@@ -93,7 +93,7 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(eventName: string, data?: T): void` - генерация события
 `off(eventName: EventName, callback: Subscriber): void` - отписка от события
 
-```
+
 
 ## Данные
 ### Интерфейсы данных 
