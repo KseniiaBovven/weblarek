@@ -53,7 +53,6 @@ export class AppPresenter {
     this.events.on('cart:updated', (data: any) => {
       this.basket.render(data);
       this.page.counter = data.count || 0;
-      this.renderCatalog();
     });
 
     this.events.on('basket:add', (data: { id: string }) => {
@@ -179,7 +178,11 @@ export class AppPresenter {
     });
 
     this.page.gallery = catalogItems;
-    this.page.counter = this.cartModel.getItemCount();
+    this.events.on('cart:updated', (data: any) => {
+    this.basket.render(data);
+    this.page.counter = data.count || 0; 
+    });
+
   }
 
   private openProductModal(productId: string): void {

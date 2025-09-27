@@ -76,71 +76,14 @@ Presenter - презентер содержит основную логику п
 `setImage(element: HTMLImageElement, src: string, alt?: string): void` - устанавливает изображение
 `render(data?: Partial<T>): HTMLElement` - обновляет компонент данными
 
-```typescript
-export abstract class Component<T> {
-    protected constructor(protected readonly container: HTMLElement) {}
-    
-    protected setText(element: HTMLElement, value: unknown) {
-        if (element) {
-            element.textContent = String(value);
-        }
-    }
-    
-    setDisabled(element: HTMLElement, state: boolean) {
-        if (element) {
-            if (state) element.setAttribute('disabled', 'disabled');
-            else element.removeAttribute('disabled');
-        }
-    }
-    
-    protected setImage(element: HTMLImageElement, src: string, alt?: string) {
-        if (element) {
-            element.src = src;
-            if (alt) element.alt = alt;
-        }
-    }
-    
-    render(data?: Partial<T>): HTMLElement {
-        Object.assign(this as object, data ?? {});
-        return this.container;
-    }
-}
-```
-
-
 #### Класс Api
 Содержит в себе базовую логику отправки запросов.
-```typescript
-export class Api implements IApi {
-    readonly baseUrl: string;
-    protected options: RequestInit;
+Конструктор:
+`constructor(baseUrl: string, options: RequestInit = {})`
+Методы:
+- `get<T extends object>(uri: string): Promise<T>` - выполняет GET-запрос
+- `post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>` - выполняет POST-запрос
 
-    constructor(baseUrl: string, options: RequestInit = {}) {
-        this.baseUrl = baseUrl;
-        this.options = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...((options.headers as object) ?? {}),
-            },
-        };
-    }
-    
-    get<T extends object>(uri: string) {
-        return fetch(this.baseUrl + uri, {
-            ...this.options,
-            method: 'GET',
-        }).then(this.handleResponse<T>);
-    }
-    
-    post<T extends object>(uri: string, data: object, method?: ApiPostMethods) {
-        return fetch(this.baseUrl + uri, {
-            ...this.options,
-            method,
-            body: JSON.stringify(data),
-        }).then(this.handleResponse<T>);
-    }
-}
-```
 #### Класс EventEmitter
 Брокер событий реализует паттерн "Наблюдатель", позволяющий отправлять события и подписываться на события, происходящие в системе. Класс используется для связи слоя данных и представления.
 Назначение: Обеспечивает коммуникацию между компонентами через события.
@@ -150,29 +93,6 @@ export class Api implements IApi {
 `emit<T extends object>(eventName: string, data?: T): void` - генерация события
 `off(eventName: EventName, callback: Subscriber): void` - отписка от события
 
-```typescript
-export class EventEmitter implements IEvents {
-    _events: Map<EventName, Set<Subscriber>>;
-
-    constructor() {
-        this._events = new Map<EventName, Set<Subscriber>>();
-    }
-
-    on<T extends object>(eventName: EventName, callback: (event: T) => void) {
-        if (!this._events.has(eventName)) {
-            this._events.set(eventName, new Set<Subscriber>());
-        }
-        this._events.get(eventName)?.add(callback);
-    }
-
-    emit<T extends object>(eventName: string, data?: T) {
-        this._events.forEach((subscribers, name) => {
-            if (name instanceof RegExp && name.test(eventName) || name === eventName) {
-                subscribers.forEach(callback => callback(data));
-            }
-        });
-    }
-}
 ```
 
 ## Данные
@@ -212,27 +132,6 @@ export class EventEmitter implements IEvents {
 `getProducts(): IProduct[]` - возвращает все товары
 `getProductById(id: string): IProduct | undefined` - находит товар по ID
 
-```typescript
-export class CatalogModel extends Model<ICatalogData> {
-    private _products: IProduct[] = [];
-
-    setProducts(products: IProduct[]): void {
-        this._products = products;
-        this.emitChanges('catalog:updated', { 
-            products: this._products,
-            selectedProduct: this._selectedProduct
-        });
-    }
-
-    getProducts(): IProduct[] {
-        return this._products;
-    }
-
-    getProductById(id: string): IProduct | undefined {
-        return this._products.find(product => product.id === id);
-    }
-}
-```
 ### Класс CartModel
 Назначение: Модель управляет корзиной покупок: добавлением, удалением товаров, подсчетом общей стоимости и количества.
 Конструктор не принимает параметров. Инициализирует модель с пустой корзиной.
@@ -248,25 +147,6 @@ export class CatalogModel extends Model<ICatalogData> {
 `getTotalPrice(): number` - вычисляет общую стоимость
 `getItemCount(): number` - возвращает количество товаров
 
-```typescript
-export class CartModel extends Model<ICartData> {
-    private _items: IProduct[] = [];
-
-    addItem(product: IProduct): void {
-        this._items.push(product);
-        this.emitChanges('cart:updated', this.getCartData());
-    }
-
-    removeItem(id: string): void {
-        this._items = this._items.filter(item => item.id !== id);
-        this.emitChanges('cart:updated', this.getCartData());
-    }
-
-    getTotalPrice(): number {
-        return this._items.reduce((total, product) => total + (product.price || 0), 0);
-    }
-}
-```
 ### Класс BuyerModel
 Назначение: Модель хранит и валидирует контактные данные и данные о доставке, введенные пользователем при оформлении заказа.
 Назначение: Управляет данными покупателя.
@@ -281,32 +161,6 @@ export class CartModel extends Model<ICartData> {
 `setBuyerData(data: Partial<IBuyer>): void `- устанавливает данные покупателя
 `validateOrder(): FormErrors` - валидирует данные заказа
 `validateContacts(): FormErrors` - валидирует контактные данные
-
-
-```typescript
-export class BuyerModel extends Model<IBuyer> {
-    private _payment: TPayment = null;
-    private _address: string = '';
-    private _phone: string = '';
-    private _email: string = '';
-
-    setBuyerData(data: Partial<IBuyer>): void {
-        if (data.payment !== undefined) this._payment = data.payment;
-        if (data.address !== undefined) this._address = data.address;
-        if (data.phone !== undefined) this._phone = data.phone;
-        if (data.email !== undefined) this._email = data.email;
-
-        this.emitChanges('buyer:updated', this.getBuyerData());
-    }
-
-    validateOrder(): FormErrors {
-        const errors: FormErrors = {};
-        if (!this._payment) errors.payment = 'Не выбран вид оплаты';
-        if (!this._address.trim()) errors.address = 'Укажите адрес доставки';
-        return errors;
-    }
-}
-```
 
 ## Слой коммуникации
 
@@ -327,6 +181,12 @@ export class BuyerModel extends Model<IBuyer> {
 - Обрабатывает ошибки сетевых запросов
 
 ## Слой представления
+####  Разделение ответственности
+- **Page** - управление layout страницы
+- **Modal** - управление модальными окнами
+- **ProductCard** - отображение товара
+- **Basket** - управление корзиной
+- **Form-компоненты** - валидация и ввод данных
 
 ### Page
 Главная страница приложения.
@@ -337,28 +197,7 @@ export class BuyerModel extends Model<IBuyer> {
 `gallery: HTMLElement[]` - массив карточек товаров
 `locked: boolean` - состояние блокировки страницы
 
-```typescript
-export class Page extends Component<IPage> {
-    protected _counter: HTMLElement;
-    protected _gallery: HTMLElement;
-    protected _basket: HTMLElement;
 
-    constructor(container: HTMLElement, protected events: IEvents) {
-        super(container);
-        this._basket.addEventListener('click', () => {
-            this.events.emit('basket:open');
-        });
-    }
-
-    set counter(value: number) {
-        this.setText(this._counter, String(value));
-    }
-
-    set gallery(items: HTMLElement[]) {
-        this._gallery.replaceChildren(...items);
-    }
-}
-```
 ### ProductCard
 Карточка товара.
 Конструктор:
@@ -369,28 +208,6 @@ export class Page extends Component<IPage> {
 `price: number | null` - цена товара
 `inBasket: boolean` - флаг наличия в корзине
 
-```typescript
-export class ProductCard extends CardView {
-    protected _button: HTMLButtonElement | null;
-
-    constructor(container: HTMLElement, protected events: IEvents) {
-        super(container);
-        this._button.addEventListener('click', (event) => {
-            event.stopPropagation();
-            this.events.emit(this._inBasket ? 'card:remove' : 'basket:add', {
-                id: this._cardId
-            });
-        });
-    }
-
-    set inBasket(value: boolean) {
-        this._inBasket = value;
-        if (this._button) {
-            this.setText(this._button, value ? 'Убрать' : 'В корзину');
-        }
-    }
-}
-```
 ### Basket
 Корзина покупок.
 Конструктор:
@@ -398,32 +215,6 @@ export class ProductCard extends CardView {
 Свойства:
 `items: IProduct[]` - товары в корзине
 `total: number` - общая стоимость
-
-```typescript
-export class Basket extends Component<IBasketData> {
-    protected _list: HTMLElement;
-    protected _total: HTMLElement;
-    protected _button: HTMLButtonElement;
-
-    constructor(container: HTMLElement, protected events: IEvents) {
-        super(container);
-        this._button.addEventListener('click', () => {
-            this.events.emit('order:open');
-        });
-    }
-
-    set items(items: IProduct[]) {
-        while (this._list.firstChild) {
-            this._list.removeChild(this._list.firstChild);
-        }
-        
-        items.forEach((item, index) => {
-            const itemElement = this.createBasketItem(item, index + 1);
-            this._list.appendChild(itemElement);
-        });
-    }
-}
-```
 
 ### OrderForm
 Назначение: Форма оформления заказа.
@@ -462,50 +253,6 @@ export class Basket extends Component<IBasketData> {
 `renderCatalog(): void` - отображает каталог товаров
 `openProductModal(productId: string): void` - открывает модальное окно товара
 
-```typescript
-export class AppPresenter {
-    private page: Page;
-    private modal: Modal;
-    private basket: Basket;
-    private orderForm: OrderForm;
-    private contactForm: ContactForm;
-
-    constructor(
-        private api: ShopAPI,
-        private catalogModel: CatalogModel,
-        private cartModel: CartModel,
-        private buyerModel: BuyerModel,
-        private events: IEvents
-    ) {
-        this.setupEventListeners();
-        this.initializeApp();
-    }
-
-    private setupEventListeners(): void {
-        this.events.on('catalog:updated', () => {
-            this.renderCatalog();
-        });
-
-        this.events.on('basket:add', (data: { id: string }) => {
-            const product = this.catalogModel.getProductById(data.id);
-            if (product) {
-                this.cartModel.addItem(product);
-            }
-        });
-
-        this.events.on('order:submit', () => {
-            if (this.buyerModel.isOrderValid()) {
-                this.openContactForm();
-            }
-        });
-    }
-
-    private async initializeApp(): Promise<void> {
-        const products = await this.api.getProductList();
-        this.catalogModel.setProducts(products);
-    }
-}
-```
 ## Список событий
 ### События данных
 `catalog:updated` - обновление каталога товаров
@@ -545,6 +292,12 @@ export class AppPresenter {
 Отправляет заказ → `contacts:submit`
 `AppPresenter` создает заказ через `ShopAPI`
 Показывает подтверждение заказа
+
+### Состояние приложения
+Приложение управляет тремя основными состояниями:
+1. **Каталог товаров** - загружается с сервера при инициализации
+2. **Корзина покупок** - хранится локально в течение сессии
+3. **Данные покупателя** - валидируются перед отправкой заказа
 
 ## Валидация форм
 Валидация выполняется с помощью `FormValidator` при отправке форм. Ошибки отображаются под полями ввода, кнопки блокируются до исправления ошибок.

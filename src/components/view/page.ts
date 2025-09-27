@@ -1,6 +1,7 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
 import { ensureElement } from '../../utils/utils';
+import { HeaderView } from './HeaderView'; // Добавляем импорт
 
 interface IPage {
     counter: number;
@@ -9,28 +10,23 @@ interface IPage {
 }
 
 export class Page extends Component<IPage> {
-    protected _counter: HTMLElement;
     protected _gallery: HTMLElement;
     protected _wrapper: HTMLElement;
-    protected _basket: HTMLElement;
+    protected _header: HeaderView; 
 
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container);
 
-        this._counter = ensureElement<HTMLElement>('.header__basket-counter', container);
+        const headerContainer = ensureElement<HTMLElement>('.header', container);
+        this._header = new HeaderView(headerContainer, events);
+        
         this._gallery = ensureElement<HTMLElement>('.gallery', container);
         this._wrapper = ensureElement<HTMLElement>('.page__wrapper', container);
-        this._basket = ensureElement<HTMLElement>('.header__basket', container);
 
-        if (this._basket) {
-            this._basket.addEventListener('click', () => {
-                this.events.emit('basket:open');
-            });
-        }
     }
 
     set counter(value: number) {
-        this.setText(this._counter, String(value));
+        this._header.counter = value; 
     }
 
     set gallery(items: HTMLElement[]) {
@@ -47,7 +43,9 @@ export class Page extends Component<IPage> {
 
     render(data?: Partial<IPage>): HTMLElement {
         if (data) {
-            Object.assign(this as object, data);
+            if (data.counter !== undefined) this.counter = data.counter;
+            if (data.gallery !== undefined) this.gallery = data.gallery;
+            if (data.locked !== undefined) this.locked = data.locked;
         }
         return this.container;
     }
